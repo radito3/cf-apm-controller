@@ -1,5 +1,8 @@
 package org.elsys;
 
+import org.cloudfoundry.client.lib.CloudCredentials;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+
 /**
  * A Factory from which the CloudClient objects are constructed
  *
@@ -22,7 +25,8 @@ public class CloudClientFactory {
      * @return A new CloudClient instance
      */
     public CloudClient newCloudClient(String token) {
-        return new CloudClientImpl(org, space, token);
+        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(token), false);
+        return new CloudClientImpl(org, space, credentials);
     }
 
     /**
@@ -33,6 +37,7 @@ public class CloudClientFactory {
      * @return A new CloudClient instance
      */
     public CloudClient newCloudClient(String user, String pass) {
-        return new CloudClientImpl(org, space, user, pass);
+        CloudCredentials credentials = new CloudCredentials(user, pass);
+        return new CloudClientImpl(org, space, credentials);
     }
 }

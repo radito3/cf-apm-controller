@@ -7,7 +7,6 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,18 +25,10 @@ public class CloudClientImpl implements CloudClient {
     private static final String TARGET = System.getenv("targetUrl");
 
     private CloudControllerClient client;
-    private CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
-    CloudClientImpl(String org, String space, String token) {
-        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(token), false);
-
+    CloudClientImpl(String org, String space, CloudCredentials credentials) {
+        CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
         client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
-    }
-
-    CloudClientImpl(String org, String space, String user, String pass) {
-        CloudCredentials credentials = new CloudCredentials(user, pass);
-
-        client =  cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
 
     @Override
