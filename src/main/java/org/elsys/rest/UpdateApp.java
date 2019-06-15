@@ -91,15 +91,12 @@ public class UpdateApp extends AbstractRestHandler {
                 .map(Integer::valueOf)
                 .toArray(Integer[]::new);
 
-        for (int i = 0; i < Math.max(repoVersion.length, currentVersion.length); i++) {
-            int repoVerPart = i < repoVersion.length ? repoVersion[i] : 0;
-            int currentVerPart = i < currentVersion.length ? currentVersion[i] : 0;
-
-            int result = Integer.compare(repoVerPart, currentVerPart);
+        for (int i = 0; i < Math.min(repoVersion.length, currentVersion.length); i++) {
+            int result = Integer.compare(repoVersion[i], currentVersion[i]);
             if (result != 0) {
                 return result;
             }
         }
-        return 0;
+        return Integer.compare(repoVersion.length, currentVersion.length);
     }
 }
