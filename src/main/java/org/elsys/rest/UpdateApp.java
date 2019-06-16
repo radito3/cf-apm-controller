@@ -25,6 +25,8 @@ import java.util.NoSuchElementException;
 @Path("/{org}/{space}/update")
 public class UpdateApp extends AbstractRestHandler {
 
+    private static final String VERSION_DELIMITERS = "[-.@$%^*&#]";
+    
     /**
      * Updates an application and returns the result of the operation
      *
@@ -84,19 +86,14 @@ public class UpdateApp extends AbstractRestHandler {
     }
 
     private static int compareVersions(String ver1, String ver2) {
-        Integer[] repoVersion = Arrays.stream(ver1.split("\\."))
-                .map(Integer::valueOf)
-                .toArray(Integer[]::new);
-        Integer[] currentVersion = Arrays.stream(ver2.split("\\."))
-                .map(Integer::valueOf)
-                .toArray(Integer[]::new);
-
-        for (int i = 0; i < Math.min(repoVersion.length, currentVersion.length); i++) {
-            int result = Integer.compare(repoVersion[i], currentVersion[i]);
+        String[] ver1Parts = ver1.split(VERSION_DELIMITERS);
+        String[] ver2Parts = ver2.split(VERSION_DELIMITERS);
+        for (int i = 0; i < Math.min(ver1Parts.length, ver2Parts.length); i++) {
+            int result = Integer.compare(Integer.parseInt(ver1Parts[i]), Integer.parseInt(ver2Parts[i]));
             if (result != 0) {
                 return result;
             }
         }
-        return Integer.compare(repoVersion.length, currentVersion.length);
+        return Integer.compare(ver1Parts.length, ver2Parts.length);
     }
 }
