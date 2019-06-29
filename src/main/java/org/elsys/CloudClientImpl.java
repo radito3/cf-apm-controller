@@ -60,12 +60,9 @@ public class CloudClientImpl implements CloudClient {
 
     @Override
     public boolean checkForExistingApp(String appName) {
-        try {
-            getApp(appName);
-        } catch (CloudFoundryException e) {
-            return false;
-        }
-        return true;
+        return getApps().stream()
+            .map(CloudEntity::getName)
+            .anyMatch(name -> name.equals(appName));
     }
 
     @Override
