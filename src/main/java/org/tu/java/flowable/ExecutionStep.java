@@ -10,10 +10,10 @@ public abstract class ExecutionStep implements JavaDelegate {
      * - get apps starting with the desired app name
      * - detect actions needed
      * - delete apps if needed
-     * - upload app-new with -idle route
+     * x upload app-new with -idle route (and delete the temp file)
      *
-     * - switch to live route
-     * - remove suffix from new app
+     * x switch to live route
+     * x remove suffix from new app
      * - delete old app
      *
      */

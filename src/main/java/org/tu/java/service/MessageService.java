@@ -30,4 +30,8 @@ public class MessageService {
         }
         return messages;
     }
+
+    public void removeOperation(String operationId) {
+        messagesPerOperation.remove(operationId);
+    }
 }

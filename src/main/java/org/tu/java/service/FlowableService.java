@@ -6,6 +6,7 @@ import org.flowable.engine.runtime.Execution;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,11 @@ public class FlowableService {
         this.processEngine = processEngine;
     }
 
-    public String startProcess(String appName) {
+    public String startProcess(String appName, Path filePath) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("appName", appName);
+        variables.put("filePath", filePath);
+
         return processEngine.getRuntimeService()
                             .startProcessInstanceByKey("bg-upload", variables)
                             .getProcessInstanceId();
@@ -35,11 +38,8 @@ public class FlowableService {
                      .rootProcessInstanceId(processId)
                      .list();
 
-        List<Execution> activeExecutions = allExecutions.stream()
+        List<Execution> executionsAtReceiveTask = allExecutions.stream()
             .filter(e -> e.getActivityId() != null)
-            .collect(Collectors.toList());
-
-        List<Execution> executionsAtReceiveTask = activeExecutions.stream()
             .filter(e -> !findCurrentActivitiesAtReceiveTask(e).isEmpty())
             .collect(Collectors.toList());
 

@@ -1,9 +1,6 @@
 package org.tu.java.rest;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +11,8 @@ import org.tu.java.service.UploadService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Set;
 
 @RestController
@@ -57,42 +54,14 @@ public class UploadController {
 
     @PostMapping(path = "/upload/{appName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadApp(HttpServletRequest request, @PathVariable String appName) {
-        String processId = flowableService.startProcess(appName);
-
-        ServletFileUpload fileUpload = new ServletFileUpload();
-        FileItemIterator itemIterator;
-        File file = null;
-
+        Path filePath;
         try {
-            file = Files.createTempFile("temp", ".tmp").toFile();
-            itemIterator = fileUpload.getItemIterator(request);
-
-            while (itemIterator.hasNext()) {
-                FileItemStream item = itemIterator.next();
-                if (item.isFormField())
-                    continue;
-
-                try (InputStream is = item.openStream(); OutputStream os = new FileOutputStream(file)) {
-                    byte[] buffer = new byte[4096];
-                    while (is.read(buffer) != -1) {
-                        os.write(buffer);
-                    }
-                }
-            }
+            filePath = uploadService.uploadFile(request);
         } catch (FileUploadException | IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .build();
-        } finally {
-            if (file != null) {
-                try {
-                    Files.delete(file.toPath());
-                } catch (IOException e) {
-                    System.err.println("failed to delete temp file");
-                }
-            }
         }
-
-        uploadService.uploadFile(appName, file.toPath());
+        String processId = flowableService.startProcess(appName, filePath);
 
         return ResponseEntity.ok()
                              .header("Location", processId)

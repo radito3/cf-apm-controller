@@ -5,8 +5,12 @@ public class UrlUtil {
     private UrlUtil() {
     }
 
-    public static String removeSchema(String url) {
+    private static final String CFAPPS_PREFIX = "cfapps.";
 
-        return "";
+    public static String getAppDomain(String url) {
+        String[] origElems = url.split("\\.");
+        String[] urlElements = new String[origElems.length - 2];
+        System.arraycopy(origElems, 2, urlElements, 0, origElems.length - 2);
+        return CFAPPS_PREFIX + String.join(".", urlElements);
     }
 }
