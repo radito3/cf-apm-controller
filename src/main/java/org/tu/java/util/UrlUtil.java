@@ -13,4 +13,9 @@ public class UrlUtil {
         System.arraycopy(origElems, 2, urlElements, 0, origElems.length - 2);
         return CFAPPS_PREFIX + String.join(".", urlElements);
     }
+
+    public static String getDomain(String url) {
+        String[] elems = url.split("://");
+        return elems[1];
+    }
 }

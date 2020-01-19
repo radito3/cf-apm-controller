@@ -7,7 +7,7 @@ import org.tu.java.service.MessageService;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@Named
+@Named("endProcessListener")
 public class EndProcessListener implements ExecutionListener {
 
     @Inject
@@ -15,6 +15,6 @@ public class EndProcessListener implements ExecutionListener {
 
     @Override
     public void notify(DelegateExecution execution) {
-        messageService.removeOperation(execution.getRootProcessInstanceId());
+        messageService.addMessage(execution.getRootProcessInstanceId(), "Operation completed");
     }
 }

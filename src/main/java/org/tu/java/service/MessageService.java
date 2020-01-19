@@ -23,12 +23,14 @@ public class MessageService {
     }
 
     public Set<String> getMessages(String operationId) {
-        Set<String> messages = messagesPerOperation.getOrDefault(operationId, Collections.emptySet());
-        if (!messages.isEmpty()) {
-            messagesPerOperation.get(operationId)
-                                .clear();
-        }
-        return messages;
+        return messagesPerOperation.getOrDefault(operationId, Collections.emptySet());
+    }
+
+    public void clearMessagesForOperation(String operationId) {
+        messagesPerOperation.computeIfPresent(operationId, (k, messages) -> {
+            messages.clear();
+            return messages;
+        });
     }
 
     public void removeOperation(String operationId) {

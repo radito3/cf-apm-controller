@@ -1,7 +1,7 @@
 package org.tu.java.flowable;
 
 import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
+import org.cloudfoundry.operations.applications.RenameApplicationRequest;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.tu.java.service.MessageService;
 
@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
 
-@Named("deleteAppsStep")
-public class DeleteAppsStep extends ExecutionStep {
+@Named("renameAppsStep")
+public class RenameAppsStep extends ExecutionStep {
 
     @Inject
     private CloudFoundryOperations cfOperations;
@@ -19,14 +19,15 @@ public class DeleteAppsStep extends ExecutionStep {
 
     @Override
     protected ExecutionStatus executeStep(DelegateExecution execution) {
-        List<String> appsToDelete = (List<String>) execution.getVariable("appsToDelete");
+        List<String> appsToRename = (List<String>) execution.getVariable("appsToRename");
 
-        for (String appName : appsToDelete) {
-            messageService.addMessage(execution.getRootProcessInstanceId(), "Deleting application " + appName + "...");
+        for (String appName : appsToRename) {
+            messageService.addMessage(execution.getRootProcessInstanceId(), "Renaming app " + appName + " to " + appName + "-old...");
 
             cfOperations.applications()
-                        .delete(DeleteApplicationRequest.builder()
+                        .rename(RenameApplicationRequest.builder()
                                                         .name(appName)
+                                                        .newName(appName + "-old")
                                                         .build())
                         .block();
         }

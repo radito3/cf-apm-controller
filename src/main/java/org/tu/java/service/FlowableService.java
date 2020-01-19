@@ -6,7 +6,7 @@ import org.flowable.engine.runtime.Execution;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.nio.file.Path;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +22,14 @@ public class FlowableService {
         this.processEngine = processEngine;
     }
 
-    public String startProcess(String appName, Path filePath) {
+    public String startProcess(String appName, URI filePath) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("appName", appName);
         variables.put("filePath", filePath);
 
         return processEngine.getRuntimeService()
                             .startProcessInstanceByKey("bg-upload", variables)
-                            .getProcessInstanceId();
+                            .getRootProcessInstanceId();
     }
 
     public void resumeProcess(String processId) {

@@ -25,8 +25,12 @@ public class FlowableConfiguration {
 
         processEngine.getRepositoryService()
                      .createDeployment()
-                     .addClasspathResource("../bg-uploader.bpmn20.xml")
+                     .addClasspathResource("org/tu/java/configuration/bg-uploader.bpmn20.xml")
                      .deploy();
+
+        processEngine.getProcessEngineConfiguration()
+                     .getAsyncExecutor()
+                     .start();
 
         return processEngine;
     }

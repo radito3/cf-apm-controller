@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Set;
 
 @RestController
@@ -36,9 +37,34 @@ public class UploadController {
     public ResponseEntity<Set<String>> getMessages(@PathVariable String operationId) {
         Set<String> result = messageService.getMessages(operationId);
 
-        //check if operation is complete
-        // -> return 201
-        //else return list of processing messages
+        if (result.contains("Enter validation phase")) {
+            messageService.clearMessagesForOperation(operationId);
+            messageService.addMessage(operationId, "Enter validation phase");
+            result.remove("Enter validation phase");
+            if (!result.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.PROCESSING)
+                                     .body(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.MULTIPLE_CHOICES)
+                                     .body(result);
+            }
+        }
+
+        if (result.contains("Operation completed")) {
+            if (result.size() == 1) {
+                messageService.removeOperation(operationId);
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                     .body(Collections.emptySet());
+            } else {
+                messageService.clearMessagesForOperation(operationId);
+                messageService.addMessage(operationId, "Operation completed");
+                result.remove("Operation completed");
+                return ResponseEntity.status(HttpStatus.PROCESSING)
+                                     .body(result);
+            }
+        }
+
+        messageService.clearMessagesForOperation(operationId);
 
         return ResponseEntity.status(HttpStatus.PROCESSING)
                              .body(result);
@@ -61,7 +87,7 @@ public class UploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .build();
         }
-        String processId = flowableService.startProcess(appName, filePath);
+        String processId = flowableService.startProcess(appName, filePath.toUri());
 
         return ResponseEntity.ok()
                              .header("Location", processId)

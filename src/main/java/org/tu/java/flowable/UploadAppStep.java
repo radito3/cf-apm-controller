@@ -8,6 +8,7 @@ import org.tu.java.service.MessageService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -22,7 +23,8 @@ public class UploadAppStep extends ExecutionStep {
     @Override
     protected ExecutionStatus executeStep(DelegateExecution execution) {
         String appName = (String) execution.getVariable("appName");
-        Path filePath = (Path) execution.getVariable("filePath");
+        URI filePath = (URI) execution.getVariable("filePath");
+        Path file = Path.of(filePath);
         String processId = execution.getRootProcessInstanceId();
 
         messageService.addMessage(processId, "Starting upload for app " + appName + "-new...");
@@ -30,7 +32,7 @@ public class UploadAppStep extends ExecutionStep {
         cfOperations.applications()
                     .push(PushApplicationRequest.builder()
                                                 .name(appName + "-new")
-                                                .path(filePath)
+                                                .path(file)
                                                 .host(appName + "-idle")
                                                 .buildpack("staticfile_buildpack")
                                                 .memory(64)
@@ -42,11 +44,14 @@ public class UploadAppStep extends ExecutionStep {
         messageService.addMessage(processId, "App " + appName + "-new uploaded");
 
         try {
-            Files.delete(filePath);
+            Files.delete(file);
         } catch (IOException e) {
+            messageService.addMessage(processId, "Error: " + e.getMessage());
             execution.setVariable("stepError", e.getMessage());
             return ExecutionStatus.ERROR;
         }
+
+        messageService.addMessage(processId, "Enter validation phase");
 
         return ExecutionStatus.SUCCESS;
     }

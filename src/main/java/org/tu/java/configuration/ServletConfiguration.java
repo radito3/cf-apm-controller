@@ -1,83 +1,54 @@
 package org.tu.java.configuration;
 
-import org.cloudfoundry.client.CloudFoundryClient;
-import org.cloudfoundry.doppler.DopplerClient;
-import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.reactor.ConnectionContext;
-import org.cloudfoundry.reactor.DefaultConnectionContext;
-import org.cloudfoundry.reactor.TokenProvider;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
-import org.cloudfoundry.uaa.UaaClient;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebMvc
 public class ServletConfiguration implements WebMvcConfigurer {
 
-    @Value("${API_HOST}")
-    private String apiHost;
-    @Value("${P_USER}")
-    private String user;
-    @Value("${P_PASS}")
-    private String password;
-
-    @Bean
-    public CloudFoundryOperations cfOperations(@Value("${ORG}") String org, @Value("${SPACE}") String space) {
-        return DefaultCloudFoundryOperations.builder()
-                                            .cloudFoundryClient(cfClient())
-                                            .uaaClient(uaaClient())
-                                            .dopplerClient(dopplerClient())
-                                            .organization(org)
-                                            .space(space)
-                                            .build();
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
     }
 
-    private ConnectionContext connectionContext() {
-        return DefaultConnectionContext.builder()
-                                       .apiHost(apiHost)
-                                       .connectTimeout(Duration.ofMinutes(30))
-                                       .connectionPoolSize(30)
-                                       .threadPoolSize(30)
-                                       .skipSslValidation(true)
-                                       .build();
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(new StringHttpMessageConverter());
+        converters.add(createJsonHttpMessageConverter());
     }
 
-    private TokenProvider tokenProvider() {
-        return PasswordGrantTokenProvider.builder()
-                                         .username(user)
-                                         .password(password)
-                                         .build();
+    private MappingJackson2HttpMessageConverter createJsonHttpMessageConverter() {
+        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(createObjectMapper());
+        mappingJackson2HttpMessageConverter.setSupportedMediaTypes(buildSupportedMediaTypes(mappingJackson2HttpMessageConverter));
+        return mappingJackson2HttpMessageConverter;
     }
 
-    private CloudFoundryClient cfClient() {
-        return ReactorCloudFoundryClient.builder()
-                                        .connectionContext(connectionContext())
-                                        .tokenProvider(tokenProvider())
-                                        .build();
+    private static ObjectMapper createObjectMapper() {
+        return new ObjectMapper().setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
-    private UaaClient uaaClient() {
-        return ReactorUaaClient.builder()
-                               .connectionContext(connectionContext())
-                               .tokenProvider(tokenProvider())
-                               .build();
-    }
-
-    private DopplerClient dopplerClient() {
-        return ReactorDopplerClient.builder()
-                                   .connectionContext(connectionContext())
-                                   .tokenProvider(tokenProvider())
-                                   .build();
+    private List<MediaType> buildSupportedMediaTypes(MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
+        List<MediaType> supportedMediaTypes = new ArrayList<>(mappingJackson2HttpMessageConverter.getSupportedMediaTypes());
+        supportedMediaTypes.add(MediaType.APPLICATION_JSON);
+        return supportedMediaTypes;
     }
 
 }

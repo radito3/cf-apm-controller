@@ -26,6 +26,8 @@ public class SwitchRoutesStep extends ExecutionStep {
     protected ExecutionStatus executeStep(DelegateExecution execution) {
         String appName = (String) execution.getVariable("appName");
 
+        messageService.addMessage(execution.getRootProcessInstanceId(), "Switching to live route on new application...");
+
         cfOperations.routes()
                     .map(MapRouteRequest.builder()
                                         .applicationName(appName + "-new")
