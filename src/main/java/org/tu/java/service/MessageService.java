@@ -1,39 +1,38 @@
 package org.tu.java.service;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Scope(BeanDefinition.SCOPE_SINGLETON)
 public class MessageService {
 
-    private Map<String, Set<String>> messagesPerOperation;
-
-    public MessageService() {
-        messagesPerOperation = new ConcurrentHashMap<>();
-    }
+    private Map<String, List<String>> messagesPerOperation = new ConcurrentHashMap<>();
 
     public void addMessage(String operationId, String message) {
-        messagesPerOperation.computeIfAbsent(operationId, k -> new HashSet<>())
+        messagesPerOperation.computeIfAbsent(operationId, k -> new ArrayList<>())
                             .add(message);
     }
 
-    public Set<String> getMessages(String operationId) {
-        return messagesPerOperation.getOrDefault(operationId, Collections.emptySet());
-    }
-
-    public void clearMessagesForOperation(String operationId) {
-        messagesPerOperation.computeIfPresent(operationId, (k, messages) -> {
-            messages.clear();
-            return messages;
-        });
+    public List<String> getMessages(String operationId) {
+        List<String> msgs = messagesPerOperation.get(operationId);
+        if (msgs == null) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<>(msgs);
+        msgs.clear();
+        return result;
     }
 
     public void removeOperation(String operationId) {
         messagesPerOperation.remove(operationId);
     }
+
 }

@@ -44,8 +44,6 @@ public class CloudFoundryConfiguration {
         return DefaultConnectionContext.builder()
                                        .apiHost(UrlUtil.getDomain(apiHost))
                                        .connectTimeout(Duration.ofMinutes(30))
-                                       .connectionPoolSize(30)
-                                       .threadPoolSize(30)
                                        .skipSslValidation(true)
                                        .build();
     }

@@ -96,37 +96,17 @@
         <dependency>
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-client-reactor</artifactId>
-            <version>4.1.0.RELEASE</version>
+            <version>4.3.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-operations</artifactId>
-            <version>4.1.0.RELEASE</version>
+            <version>4.3.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
             <version>3.3.0.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.flowable</groupId>
-            <artifactId>flowable-engine</artifactId>
-            <version>6.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.21</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.21</version>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.196</version>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
